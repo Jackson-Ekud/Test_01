@@ -1,0 +1,263 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZLSHADMINT01
+*&---------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*& TABLES
+*&---------------------------------------------------------------------*
+TABLES: TADIR,
+        DD02L,
+        ZLSHT9100.
+
+TYPE-POOLS: ICON,
+            SLIS,
+            TRUXS.
+
+INCLUDE: <CL_ALV_CONTROL>,
+         <CTLDEF>.
+
+*&---------------------------------------------------------------------*
+*& INTERNAL TABLE
+*&---------------------------------------------------------------------*
+DATA: BEGIN OF GT_RESULT_100 OCCURS 0,
+        ZMODULE  LIKE ZLSHT9100-ZMODULE,
+        ASIS     LIKE ZLSHT9100-ASIS,
+        TOBE     LIKE DD02L-TABNAME,
+        TOBE_TXT LIKE DD02T-DDTEXT,
+        DATA_CNT TYPE I,
+      END OF GT_RESULT_100.
+
+DATA: BEGIN OF GT_RESULT_300 OCCURS 0,
+        ICON     LIKE ICON-ID,
+        ZMODULE  LIKE ZLSHT9100-ZMODULE,
+        ASIS     LIKE ZLSHT9100-ASIS,
+        TOBE     LIKE DD02L-TABNAME,
+        TOBE_TXT LIKE DD02T-DDTEXT,
+        DATA_CNT TYPE I,
+      END OF GT_RESULT_300.
+
+DATA: BEGIN OF GT_FIELDLIST OCCURS 0,
+        POSITION      LIKE DD03L-POSITION,
+        FIELDNAME     LIKE DD03L-FIELDNAME,
+        FIELDNAME_TXT LIKE DD04T-DDTEXT,
+        DATATYPE      LIKE RFC_DB_FLD-TYPE,
+        LENGTH        LIKE RFC_DB_FLD-LENGTH,
+      END OF GT_FIELDLIST.
+
+DATA: GT_ASIS_FIELD LIKE DFIES OCCURS 0 WITH HEADER LINE.
+
+DATA: GS_RESULT_100 LIKE GT_RESULT_100.
+
+DATA: GT_SELECTED_ROW LIKE LVC_S_ROW OCCURS 0 WITH HEADER LINE.
+
+DATA: GT_QUERY TYPE TABLE OF RFC_DB_OPT,
+      GS_QUERY TYPE RFC_DB_OPT.
+
+DATA: BEGIN OF GT_MAPFIELD OCCURS 0,
+        MAPCD      LIKE ZLSHT9102-MAPCD,
+        FIELD_FROM LIKE ZLSHT9102-FIELD_FROM,
+        FIELD_TO   LIKE ZLSHT9102-FIELD_TO,
+        PREFIX     LIKE ZLSHT9101-PREFIX,
+      END OF GT_MAPFIELD.
+
+DATA: BEGIN OF GT_MAPVALUE OCCURS 0,
+        MAPCD LIKE ZLSHT9100-MAPCD,
+        ASIS  LIKE ZLSHT9100-ASIS,
+        TOBE  LIKE ZLSHT9100-TOBE,
+      END OF GT_MAPVALUE.
+
+DATA: BEGIN OF GT_CONV OCCURS 0,
+        FIELDNAME TYPE FIELDNAME,
+        GUBUN,
+      END OF GT_CONV.
+
+DATA: BEGIN OF GS_SQL,
+        TABNAME     LIKE DD02L-TABNAME,
+        TABNAME_TXT LIKE DD02T-DDTEXT,
+      END OF GS_SQL.
+
+* # Cell# ## ##
+DATA: GT_CELLTAB TYPE LVC_T_STYL,
+      GS_CELLTAB TYPE LVC_S_STYL.
+
+*&---------------------------------------------------------------------*
+*& GLOBAL VARIABLES
+*&---------------------------------------------------------------------*
+
+DATA: G_OKCODE  LIKE SY-UCOMM,
+      G_TITLE_L TYPE STRING.
+
+DATA: G_LABEL,
+      G_LEFT_WIDTH  TYPE I.
+
+*For ALV display
+DATA: G_REPID      LIKE SY-REPID,
+      G_SUBRC      LIKE SY-SUBRC,
+      G_EDIT,
+      G_TABNAME    LIKE DD02L-TABNAME,
+      G_DATA_CNT   TYPE I,
+      G_RESULT_CNT TYPE I,
+      G_TOTAL_CNT  TYPE I,
+      G_WO_ALV.   "Without ALV
+
+DATA: G_IN_DATA     TYPE XSTRING.
+
+DATA: G_FULLPATH TYPE STRING.
+
+DATA: G_OREF      TYPE REF TO CX_ROOT,
+      G_ERROR_TXT TYPE STRING.
+
+DATA: G_ADMIN.
+RANGES: GR_TOBE FOR ZLSHT9100-TOBE.
+
+*&---------------------------------------------------------------------*
+*For Dynamic internal table
+*&---------------------------------------------------------------------*
+FIELD-SYMBOLS: <FS_DYN_TABLE>      TYPE STANDARD TABLE,
+               <FS_DYN_WA>         TYPE ANY,
+               <FS_DYN_TABLE_DISP> TYPE STANDARD TABLE,
+               <FS_DYN_WA_DISP>    TYPE ANY,
+               <FS_DYN_TABLE_DOWN> TYPE STANDARD TABLE,
+               <FS_DYN_WA_DOWN>    TYPE ANY,
+
+               <FS_DYN_TABLE_ASIS> TYPE STANDARD TABLE,
+               <FS_DYN_WA_ASIS>    TYPE ANY.
+
+FIELD-SYMBOLS: <FS_FIELD>      TYPE ANY,
+               <FS_VALUE>      TYPE ANY,
+               <FS_FIELD_ASIS> TYPE ANY.
+*&---------------------------------------------------------------------*
+*& FOR ALV
+*&---------------------------------------------------------------------*
+
+DATA: G_EDITOR           TYPE REF TO CL_GUI_TEXTEDIT,
+      G_EDITOR_CONTAINER TYPE REF TO CL_GUI_CUSTOM_CONTAINER.
+
+DATA: G_CUSTOM_CONTAINER_100 TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+      G_CUSTOM_CONTAINER_200 TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+      G_CUSTOM_CONTAINER_300 TYPE REF TO CL_GUI_CUSTOM_CONTAINER.
+
+DATA: GC_CONTAINER_100 TYPE REF TO CL_GUI_CONTAINER,
+      GC_CONTAINER_200 TYPE REF TO CL_GUI_CONTAINER,
+*      GC_CONTAINER_300      TYPE REF TO CL_GUI_CONTAINER,
+
+      G_CONTAINER_300  TYPE SCRFNAME VALUE 'CONT_300',
+
+      GC_SPLITTER      TYPE REF TO CL_GUI_SPLITTER_CONTAINER,
+      GC_GRID_100_L    TYPE REF TO CL_GUI_ALV_GRID,
+      GC_GRID_100_R    TYPE REF TO CL_GUI_ALV_GRID,
+      GC_GRID_200      TYPE REF TO CL_GUI_ALV_GRID,
+      GC_GRID_300      TYPE REF TO CL_GUI_ALV_GRID.
+
+DATA: GS_LAYOUT_100_L   TYPE LVC_S_LAYO,
+      GS_LAYOUT_100_R   TYPE LVC_S_LAYO,
+      GS_LAYOUT_200     TYPE LVC_S_LAYO,
+      GS_LAYOUT_300     TYPE LVC_S_LAYO,
+
+      GS_VARIANT_100_L  TYPE DISVARIANT,
+      GS_VARIANT_100_R  TYPE DISVARIANT,
+
+      GS_FIELDCAT       TYPE LVC_S_FCAT,
+
+      GT_FIELDCAT_100_L TYPE LVC_T_FCAT,
+      GT_FIELDCAT_100_R TYPE LVC_T_FCAT,
+      GT_FIELDCAT_NAME  TYPE LVC_T_FCAT,
+      GT_FIELDCAT_LABEL TYPE LVC_T_FCAT,
+      GT_FIELDCAT_200   TYPE LVC_T_FCAT,
+      GT_FIELDCAT_300   TYPE LVC_T_FCAT,
+
+      GT_FIELDCAT_ASIS  TYPE LVC_T_FCAT,
+
+      GS_SORT           TYPE LVC_S_SORT,
+      GT_SORT_100_L     TYPE LVC_T_SORT,
+      GT_SORT_100_R     TYPE LVC_T_SORT,
+      GT_SORT_200       TYPE LVC_T_SORT,
+      GT_SORT_300       TYPE LVC_T_SORT.
+
+
+DATA: GT_EXCLUDE_100_L TYPE UI_FUNCTIONS,          "ToolBar
+      GT_EXCLUDE_100_R TYPE UI_FUNCTIONS.
+
+*&---------------------------------------------------------------------*
+*& CONSTANTS
+*&---------------------------------------------------------------------*
+CONSTANTS: C_A     TYPE C              VALUE 'A',
+           C_C     TYPE C              VALUE 'C',
+           C_E     TYPE C              VALUE 'E',
+           C_I     TYPE C              VALUE 'I',
+           C_S     TYPE C              VALUE 'S',
+           C_X     TYPE C              VALUE 'X',
+           C_EQ(2) TYPE C              VALUE 'EQ',
+           C_BT(2) TYPE C              VALUE 'BT',
+           C_CP(2) TYPE C              VALUE 'CP'.
+
+CONSTANTS: C_FCODE_DOWN    LIKE SY-UCOMM        VALUE 'DOWNLOAD',
+           C_FCODE_UP      LIKE SY-UCOMM        VALUE 'UPLOAD',
+           C_FCODE_SAVE    LIKE SY-UCOMM        VALUE 'SAVE',
+           C_FCODE_DEL     LIKE SY-UCOMM        VALUE 'DELETE',
+           C_FCODE_REFRESH LIKE SY-UCOMM        VALUE 'REFRESH',
+           C_FCODE_SQL     LIKE SY-UCOMM        VALUE 'SQL',
+           C_FCODE_MULTI   LIKE SY-UCOMM        VALUE 'MULTI',
+           C_COLUMN_COL(4) VALUE 'C310',
+           C_COLUMN_KEY(4) VALUE 'C110',
+
+           C_PGMID(4)      TYPE C               VALUE 'R3TR',
+           C_OBJECT(4)     TYPE C               VALUE 'TABL',
+           C_TABLE_C(10)   TYPE C               VALUE 'TRANSP',
+           C_ZDCAT_ABAP    TYPE C               VALUE 'A',
+           C_ZDCAT_DATA    TYPE C               VALUE 'B',
+           C_CBO_CLASS     TYPE DEVCLASS        VALUE 'Z%',
+           C_CLNT(4)       TYPE C               VALUE 'CLNT',
+           C_ZCRNAME       TYPE FIELDNAME       VALUE 'ZCRNAME',
+
+           C_CONV_PREFIX   TYPE STRING          VALUE 'CONVERSION_EXIT_',
+           C_CONV_SUFFIX   TYPE STRING          VALUE '_INPUT',
+
+           C_GROUP1(4)     TYPE C               VALUE 'GR1',
+           C_FILTER        TYPE STRING          VALUE 'Excel(*.XLS)|*.XLS|Excel2007(*.XLSX)|*.XLSX|'. "'EXCEL-files(*.xlsx)|*.xlsx|*.xls|'.
+
+CONSTANTS: C_LINE_LENGTH TYPE I                VALUE 255,
+           C_CELLTAB     TYPE FIELDNAME        VALUE 'CELLTAB',
+           C_MAIN_TAB    TYPE STRING           VALUE 'ZLSHT9000',
+           C_TABFIELD    TYPE STRING           VALUE 'TABNAME',
+           C_DEFAULT     TYPE STRING           VALUE 'DEFAULT',
+           C_SPACE       TYPE STRING           VALUE 'SPACE',
+           C_NA_1        TYPE STRING           VALUE 'NA',
+           C_NA_2        TYPE STRING           VALUE 'N/A'.
+
+*&---------------------------------------------------------------------*
+*& SELECTION-SCREEN
+*&---------------------------------------------------------------------*
+SELECTION-SCREEN BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-T01.
+  PARAMETERS: P_ZSYSID   LIKE ZLSHT9100-ZSYSID OBLIGATORY
+                              MEMORY ID ZSYSID DEFAULT 'S01'.
+
+  SELECT-OPTIONS: S_ZMODUL FOR ZLSHT9100-ZMODULE,
+                  S_TOBE   FOR ZLSHT9100-TOBE.
+
+SELECTION-SCREEN END OF BLOCK B1.
+
+SELECTION-SCREEN BEGIN OF BLOCK B2 WITH FRAME TITLE TEXT-T02.
+  PARAMETERS: P_AUTO AS CHECKBOX.
+  SELECT-OPTIONS: S_MAPCD  FOR ZLSHT9100-MAPCD.
+SELECTION-SCREEN END OF BLOCK B2.
+
+SELECTION-SCREEN BEGIN OF BLOCK B3 WITH FRAME TITLE TEXT-T03.
+  PARAMETERS: P_DEST LIKE RFCDES-RFCDEST OBLIGATORY MEMORY ID RFC.
+  PARAMETERS: P_ASIS RADIOBUTTON GROUP R2,
+              P_TOBE RADIOBUTTON GROUP R2.
+SELECTION-SCREEN END OF BLOCK B3.
+
+SELECTION-SCREEN BEGIN OF BLOCK B4 WITH FRAME TITLE TEXT-T04.
+  PARAMETERS: R_MODI RADIOBUTTON GROUP R1 DEFAULT 'X'.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN POSITION 1.
+    PARAMETERS: R_DEL  RADIOBUTTON GROUP R1.
+    SELECTION-SCREEN COMMENT 2(60) TEXT-S01 FOR FIELD R_DEL.
+  SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN END OF BLOCK B4.
+
+SELECTION-SCREEN BEGIN OF BLOCK B5 WITH FRAME TITLE TEXT-T05.
+  PARAMETERS: P_CNT AS CHECKBOX.
+SELECTION-SCREEN END OF BLOCK B5.

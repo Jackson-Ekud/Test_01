@@ -1,0 +1,338 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZLSHADMINCLS
+*&---------------------------------------------------------------------*
+
+CLASS: LCL_EVENT_HANDLER   DEFINITION DEFERRED.
+*       lcl_event_handler_1 DEFINITION DEFERRED,
+*       lcl_event_handler_2 DEFINITION DEFERRED,
+*       lcl_event_handler_3 DEFINITION DEFERRED.
+
+DATA: G_EVENT_HANDLER   TYPE REF TO LCL_EVENT_HANDLER.
+*      g_event_handler_1 TYPE REF TO lcl_event_handler_1,
+*      g_event_handler_2 TYPE REF TO lcl_event_handler_2,
+*      g_event_handler_3 TYPE REF TO lcl_event_handler_3.
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_event_handler DEFINITION
+*----------------------------------------------------------------------*
+CLASS LCL_EVENT_HANDLER DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+
+*      HANDLE_DOUBLE_CLICK
+*                    FOR EVENT DOUBLE_CLICK OF CL_GUI_ALV_GRID
+*        IMPORTING E_ROW
+*                    E_COLUMN
+*                    ES_ROW_NO,
+
+*      HANDLE_DOUBLE_CLICK_3
+*                    FOR EVENT DOUBLE_CLICK OF CL_GUI_ALV_GRID
+*        IMPORTING E_ROW
+*                    E_COLUMN
+*                    ES_ROW_NO,
+
+      HANDLE_HOTSPOT_CLICK
+                    FOR EVENT HOTSPOT_CLICK OF CL_GUI_ALV_GRID
+        IMPORTING E_ROW_ID
+                    E_COLUMN_ID
+                    ES_ROW_NO,
+
+      HANDLE_USER_COMMAND
+                    FOR EVENT USER_COMMAND OF CL_GUI_ALV_GRID
+        IMPORTING E_UCOMM,
+
+      HANDLE_TOOLBAR_1
+                    FOR EVENT TOOLBAR OF CL_GUI_ALV_GRID
+        IMPORTING E_OBJECT
+                    E_INTERACTIVE,
+
+      HANDLE_TOOLBAR_2
+                    FOR EVENT TOOLBAR OF CL_GUI_ALV_GRID
+        IMPORTING E_OBJECT
+                    E_INTERACTIVE.
+
+*FOR SCREEN 200
+    METHODS:
+      HANDLE_HOTSPOT_CLICK_200
+                    FOR EVENT HOTSPOT_CLICK OF CL_GUI_ALV_GRID
+          IMPORTING E_ROW_ID
+                    E_COLUMN_ID
+                    ES_ROW_NO.
+
+ENDCLASS.                    "LCL_EVENT_HANDLER DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS LCL_EVENT_HANDLER IMPLEMENTATION
+*----------------------------------------------------------------------*
+CLASS LCL_EVENT_HANDLER IMPLEMENTATION .
+  METHOD HANDLE_USER_COMMAND.
+    PERFORM ALV_HANDLE_USER_COMMAND USING E_UCOMM.
+  ENDMETHOD.                    "handle_user_command
+
+  METHOD HANDLE_TOOLBAR_1.
+    PERFORM ALV_HANDLE_TOOLBAR_1 USING E_OBJECT
+                                     E_INTERACTIVE..
+  ENDMETHOD.                    "HANDLE_TOOLBAR_2
+
+  METHOD HANDLE_TOOLBAR_2.
+    PERFORM ALV_HANDLE_TOOLBAR_2 USING E_OBJECT
+                                     E_INTERACTIVE..
+  ENDMETHOD.                    "HANDLE_TOOLBAR_2
+
+*  METHOD HANDLE_DOUBLE_CLICK.
+*    PERFORM ALV_HANDLE_DOUBLE_CLICK USING E_ROW E_COLUMN.
+*  ENDMETHOD.                    "handle_double_click
+
+*  METHOD HANDLE_DOUBLE_CLICK_3.
+*    PERFORM ALV_HANDLE_DOUBLE_CLICK_3 USING E_ROW E_COLUMN.
+*  ENDMETHOD.                    "handle_double_click
+
+  METHOD: HANDLE_HOTSPOT_CLICK.
+    PERFORM ALV_HOTSPOT_CLICK_L USING E_ROW_ID E_COLUMN_ID ES_ROW_NO.
+  ENDMETHOD.                    "handle_hotspot_click
+
+*FOR SCREEN 200
+  METHOD: HANDLE_HOTSPOT_CLICK_200.
+    PERFORM ALV_HOTSPOT_CLICK_200 USING E_ROW_ID E_COLUMN_ID ES_ROW_NO.
+  ENDMETHOD.                    "handle_hotspot_click
+
+ENDCLASS.                    "LCL_EVENT_HANDLER IMPLEMENTATION
+
+*&---------------------------------------------------------------------*
+*&      Form  ALV_HANDLE_TOOLBAR_1
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->E_OBJECT       text
+*      -->E_INTERACTIVE  text
+*----------------------------------------------------------------------*
+FORM ALV_HANDLE_TOOLBAR_1  USING    E_OBJECT TYPE REF TO CL_ALV_EVENT_TOOLBAR_SET
+                                  E_INTERACTIVE.
+
+  DATA: LS_TOOLBAR TYPE STB_BUTTON.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-BUTN_TYPE = '3'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-FUNCTION  = C_FCODE_SQL.
+  LS_TOOLBAR-ICON      = ICON_QUERY.
+  LS_TOOLBAR-BUTN_TYPE = '0'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  LS_TOOLBAR-TEXT      = TEXT-B04.
+  LS_TOOLBAR-QUICKINFO = SPACE.
+  LS_TOOLBAR-CHECKED   = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-FUNCTION  = C_FCODE_MULTI.
+  LS_TOOLBAR-ICON      = ICON_TRANSFER.
+  LS_TOOLBAR-BUTN_TYPE = '0'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  LS_TOOLBAR-TEXT      = TEXT-B07.
+  LS_TOOLBAR-QUICKINFO = SPACE.
+  LS_TOOLBAR-CHECKED   = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+ENDFORM.                    "ALV_HANDLE_TOOLBAR_1
+
+*&---------------------------------------------------------------------*
+*&      Form  ALV_HANDLE_TOOLBAR_2
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_E_OBJECT  text
+*----------------------------------------------------------------------*
+FORM ALV_HANDLE_TOOLBAR_2  USING    E_OBJECT TYPE REF TO CL_ALV_EVENT_TOOLBAR_SET
+                                  E_INTERACTIVE.
+
+  DATA: LS_TOOLBAR TYPE STB_BUTTON.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-BUTN_TYPE = '3'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+*  CLEAR LS_TOOLBAR.
+*  LS_TOOLBAR-FUNCTION  = C_FCODE_REFRESH.
+*  LS_TOOLBAR-ICON      = ICON_REFRESH.
+*  LS_TOOLBAR-BUTN_TYPE = '0'.
+*  LS_TOOLBAR-DISABLED  = SPACE.
+*  LS_TOOLBAR-TEXT      = TEXT-B06.
+*  LS_TOOLBAR-QUICKINFO = SPACE.
+*  LS_TOOLBAR-CHECKED   = SPACE.
+*  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-FUNCTION  = C_FCODE_DOWN.
+  LS_TOOLBAR-ICON      = ICON_EXPORT.
+  LS_TOOLBAR-BUTN_TYPE = '0'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  LS_TOOLBAR-TEXT      = TEXT-B01.
+  LS_TOOLBAR-QUICKINFO = SPACE.
+  LS_TOOLBAR-CHECKED   = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+  CHECK G_EDIT IS NOT INITIAL.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-FUNCTION  = C_FCODE_UP.
+  LS_TOOLBAR-ICON      = ICON_IMPORT.
+  LS_TOOLBAR-BUTN_TYPE = '0'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  LS_TOOLBAR-TEXT      = TEXT-B02.
+  LS_TOOLBAR-QUICKINFO = SPACE.
+  LS_TOOLBAR-CHECKED   = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+  CLEAR LS_TOOLBAR.
+  LS_TOOLBAR-FUNCTION  = C_FCODE_SAVE.
+  LS_TOOLBAR-ICON      = ICON_SYSTEM_SAVE.
+  LS_TOOLBAR-BUTN_TYPE = '0'.
+  LS_TOOLBAR-DISABLED  = SPACE.
+  LS_TOOLBAR-TEXT      = TEXT-B03.
+  LS_TOOLBAR-QUICKINFO = SPACE.
+  LS_TOOLBAR-CHECKED   = SPACE.
+  APPEND LS_TOOLBAR TO E_OBJECT->MT_TOOLBAR.
+
+ENDFORM.                    "ALV_HANDLE_TOOLBAR_2
+*&---------------------------------------------------------------------*
+*&      Form  ALV_HANDLE_USER_COMMAND
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_E_UCOMM  text
+*----------------------------------------------------------------------*
+FORM ALV_HANDLE_USER_COMMAND  USING    P_UCOMM.
+
+  CLEAR G_SUBRC.
+  CASE P_UCOMM.
+*----------------------------------------------------------------------*
+*For Left Grid
+*----------------------------------------------------------------------*
+    WHEN C_FCODE_SQL.
+      PERFORM GET_SELECTED_ROW     TABLES GT_SELECTED_ROW
+                                    USING GC_GRID_100_L
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+      PERFORM CALL_QUERY_SCREEN.
+
+    WHEN C_FCODE_MULTI.
+      PERFORM GET_SELECTED_ROW     TABLES GT_SELECTED_ROW
+                                    USING GC_GRID_100_L
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+
+      PERFORM POPUP_CONFIRM         USING TEXT-P05
+                                          TEXT-P06
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+
+      PERFORM MULTI_TRANSFER.
+*Call Result POP-UP
+      CALL SCREEN 300 STARTING AT 30 1.
+
+*----------------------------------------------------------------------*
+*For Right Grid
+*----------------------------------------------------------------------*
+    WHEN C_FCODE_SAVE.
+      PERFORM CHECK_VALID           USING GC_GRID_100_R
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+      PERFORM GET_SELECTED_ROW     TABLES GT_SELECTED_ROW
+                                    USING GC_GRID_100_R
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+      PERFORM POPUP_CONFIRM         USING TEXT-P01
+                                          TEXT-P02
+                                 CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+      PERFORM SAVE_TO_DB            USING GS_RESULT_100-TOBE
+                                 CHANGING G_SUBRC.
+
+    WHEN C_FCODE_REFRESH.
+      PERFORM REFRESH_RIGHT_DATA.
+
+    WHEN C_FCODE_DOWN.
+      CHECK <FS_DYN_TABLE_DISP> IS ASSIGNED
+        AND GS_RESULT_100-TOBE IS NOT INITIAL.
+      PERFORM CONVERT_DOWNLOAD_DATA.
+      PERFORM DOWNLOAD_EXCEL_FILE   USING GS_RESULT_100-TOBE.
+
+    WHEN C_FCODE_UP.
+      PERFORM UPLOAD_EXCEL_FILE  CHANGING G_SUBRC.
+      CHECK G_SUBRC = 0.
+      PERFORM CONVERT_UPLOADED_DATA.
+      PERFORM DISPLAY_ALV_GRID_R.
+
+  ENDCASE.
+
+ENDFORM.                    "ALV_HANDLE_USER_COMMAND
+*&---------------------------------------------------------------------*
+*&      Form  ALV_HOTSPOT_CLICK_L
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_E_ROW_ID  text
+*      -->P_E_COLUMN_ID  text
+*      -->P_ES_ROW_NO  text
+*----------------------------------------------------------------------*
+FORM ALV_HOTSPOT_CLICK_L     USING PS_ROW_ID    LIKE LVC_S_ROW
+                                   PS_COLUMN_ID LIKE LVC_S_COL
+                                   PS_ROW_NO    LIKE LVC_S_ROID.
+
+  CLEAR GS_RESULT_100.
+  READ TABLE GT_RESULT_100 INTO GS_RESULT_100 INDEX PS_ROW_ID-INDEX.
+
+  CHECK SY-SUBRC = 0.
+
+  CASE PS_COLUMN_ID-FIELDNAME.
+    WHEN 'ASIS' OR 'TOBE'.
+      REFRESH GT_QUERY.
+      PERFORM GET_MAPIING_INFO.
+      PERFORM GET_AND_DISPLAY_DATA       USING GS_RESULT_100.
+  ENDCASE.
+
+ENDFORM.                    " ALV_HOTSPOT_CLICK_L
+
+*&---------------------------------------------------------------------*
+*&      Form  ALV_HOTSPOT_CLICK_200
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->PS_ROW_ID     text
+*      -->PS_COLUMN_ID  text
+*      -->PS_ROW_NO     text
+*----------------------------------------------------------------------*
+FORM ALV_HOTSPOT_CLICK_200   USING PS_ROW_ID    LIKE LVC_S_ROW
+                                   PS_COLUMN_ID LIKE LVC_S_COL
+                                   PS_ROW_NO    LIKE LVC_S_ROID.
+
+  READ TABLE GT_FIELDLIST INDEX PS_ROW_ID-INDEX.
+  CHECK SY-SUBRC = 0.
+
+  IF G_EDITOR IS NOT INITIAL.
+    CALL METHOD G_EDITOR->GET_TEXT_AS_R3TABLE
+      IMPORTING
+        TABLE = GT_QUERY.
+  ENDIF.
+
+  CLEAR GS_QUERY-TEXT.
+  CONCATENATE GT_FIELDLIST-FIELDNAME '='
+         INTO GS_QUERY-TEXT SEPARATED BY SPACE.
+
+  IF GT_QUERY[] IS NOT INITIAL.
+    CONCATENATE 'AND' GS_QUERY-TEXT INTO GS_QUERY-TEXT SEPARATED BY SPACE.
+  ENDIF.
+
+  APPEND GS_QUERY TO GT_QUERY.
+  CLEAR GS_QUERY.
+
+*  PERFORM CLEAR_EDITOR.
+
+  CALL METHOD G_EDITOR->SET_TEXT_AS_R3TABLE
+    EXPORTING
+      TABLE = GT_QUERY.
+
+ENDFORM.                    " ALV_HOTSPOT_CLICK_L

@@ -1,0 +1,31 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZLSHADMINI01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE EXIT INPUT.
+
+  LEAVE TO SCREEN 0.
+
+ENDMODULE.                 " EXIT  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0200 INPUT.
+
+  CLEAR G_SUBRC.
+  CASE G_OKCODE.
+    WHEN 'SAVE_200'.
+      PERFORM SAVE_QUERY    CHANGING G_SUBRC.
+*      CHECK G_SUBRC = 0.
+      PERFORM GET_MAPIING_INFO.
+      PERFORM GET_AND_DISPLAY_DATA       USING GS_RESULT_100.
+      LEAVE TO SCREEN 0.
+  ENDCASE.
+
+ENDMODULE.                 " USER_COMMAND_0200  INPUT

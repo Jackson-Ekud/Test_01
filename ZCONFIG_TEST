@@ -1,0 +1,71 @@
+************************************************************************
+*  MODULE        :
+*  TYPE          : REPORT
+*  P/G ##      : CBO DATA MIGRATION
+*  ###        : SH LEE
+*  ####      : 2019.04.17
+*
+************************************************************************
+*
+*                        MODIFICATION LOG
+*
+*  Date.           Author.        description.
+*----------------------------------------------------------------------*
+* 2019.04.17   SH LEE       INITIALIZE
+*----------------------------------------------------------------------*
+
+REPORT  ZPOSCOMIG MESSAGE-ID 00.
+
+*&---------------------------------------------------------------------*
+*& INCLUDE
+*&---------------------------------------------------------------------*
+INCLUDE ZPOSCOMIGT01.
+*INCLUDE ZLSHMIGT01.
+INCLUDE ZPOSCOMIGCLS.
+*INCLUDE ZLSHMIGCLS.
+INCLUDE ZPOSCOMIGF01.
+*INCLUDE ZLSHMIGF01.
+INCLUDE ZPOSCOMIGO01.
+*INCLUDE ZLSHMIGO01.
+INCLUDE ZPOSCOMIGI01.
+*INCLUDE ZLSHMIGI01.
+
+*&---------------------------------------------------------------------*
+*& INITIALIZATION
+*&---------------------------------------------------------------------*
+INITIALIZATION.
+  PERFORM INITIALIZATION.
+
+*&---------------------------------------------------------------------*
+*& AT SELECTION-SCREEN
+*&---------------------------------------------------------------------*
+AT SELECTION-SCREEN.
+  PERFORM EXECUTE_SELECTION_SCREEN.
+
+AT SELECTION-SCREEN OUTPUT.
+  PERFORM MODIFY_SCREEN_1000.
+
+AT SELECTION-SCREEN ON P_DEST.
+  PERFORM CHECK_DEST_PING.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR S_TOBE-LOW.
+  PERFORM F4_TOBE USING 'S_TOBE-LOW'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR S_TOBE-HIGH.
+  PERFORM F4_TOBE USING 'S_TOBE-HIGH'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR S_MAPCD-LOW.
+  PERFORM F4_MAPCD USING 'S_MAPCD-LOW'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR S_MAPCD-HIGH.
+  PERFORM F4_MAPCD USING 'S_MAPCD-HIGH'.
+
+*&---------------------------------------------------------------------*
+*& START-OF-SELECTION
+*&---------------------------------------------------------------------*
+START-OF-SELECTION.
+
+  PERFORM MAIN_PROCESS.
+  PERFORM CALL_ALV_SCREEN.
+
+END-OF-SELECTION.

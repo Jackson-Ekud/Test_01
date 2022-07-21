@@ -1,0 +1,125 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZLSHADMINO01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE STATUS_0100 OUTPUT.
+
+  DATA: L_TITLE TYPE STRING.
+
+*Set Title
+  CLEAR L_TITLE.
+  L_TITLE = G_TITLE_L.
+  IF P_ASIS IS NOT INITIAL.
+    CONCATENATE L_TITLE TEXT-001
+           INTO L_TITLE SEPARATED BY SPACE.
+  ELSE.
+    CONCATENATE L_TITLE TEXT-002
+           INTO L_TITLE SEPARATED BY SPACE.
+  ENDIF.
+
+  IF P_AUTO IS NOT INITIAL.
+    CONCATENATE L_TITLE '-' 'AUTO CONVERSION'
+           INTO L_TITLE SEPARATED BY SPACE.
+  ENDIF.
+
+  SET PF-STATUS 'G0100'.
+  SET TITLEBAR 'T0100' WITH L_TITLE.
+
+ENDMODULE.                 " STATUS_0100  OUTPUT
+
+*&---------------------------------------------------------------------*
+*&      Module  CREATE_ALV_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE CREATE_ALV_0100 OUTPUT.
+
+  IF G_CUSTOM_CONTAINER_100 IS INITIAL.
+*   ALV Docking Container
+    PERFORM SET_CONTAINER_CUSTOM USING 'HEAD_CON'
+                                         1 2 2000
+                               CHANGING G_CUSTOM_CONTAINER_100 GC_SPLITTER.
+
+    PERFORM SET_GRID_L USING GC_SPLITTER  1 1
+                    CHANGING GC_CONTAINER_100 GC_GRID_100_L.
+
+    PERFORM SET_GRID_R USING GC_SPLITTER  1 2
+                    CHANGING GC_CONTAINER_100 GC_GRID_100_R.
+
+    PERFORM DISPLAY_ALV_LEFT.
+    PERFORM DISPLAY_ALV_RIGHT.
+  ENDIF.
+
+ENDMODULE.                 " CREATE_ALV_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0200  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE STATUS_0200 OUTPUT.
+
+  SET PF-STATUS 'G0200'.
+  SET TITLEBAR 'T0200'.
+
+ENDMODULE.                 " STATUS_0200  OUTPUT
+
+*----------------------------------------------------------------------*
+*  MODULE CREATE_TEXT_EDITOR OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE CREATE_TEXT_EDITOR OUTPUT.
+
+  PERFORM CREATE_TEXT_EDITOR.
+
+ENDMODULE.                    "CREATE_TEXT_EDITOR OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  CREATE_ALV_0200  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE CREATE_ALV_0200 OUTPUT.
+
+  IF G_CUSTOM_CONTAINER_200 IS INITIAL.
+*Create container
+    CREATE OBJECT G_CUSTOM_CONTAINER_200
+      EXPORTING
+        CONTAINER_NAME = 'SQL_CON'.
+
+    CREATE OBJECT GC_GRID_200
+      EXPORTING
+        I_PARENT = G_CUSTOM_CONTAINER_200.
+
+    PERFORM SET_GRID_LAYO_200.
+    PERFORM SET_EVENT_200.
+    PERFORM SET_GRID_FCATALOG_200.
+
+    PERFORM DISPLAY_ALV_GRID_200.
+
+  ELSE.
+    PERFORM REFRESH_ALV_200.
+  ENDIF.
+
+ENDMODULE.                 " CREATE_ALV_0200  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0300  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE STATUS_0300 OUTPUT.
+  SET PF-STATUS 'G0300'.
+  SET TITLEBAR 'T0300'.
+
+ENDMODULE.                 " STATUS_0300  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  CREATE_ALV_0300  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE CREATE_ALV_0300 OUTPUT.
+  PERFORM CREATE_ALV_0300.
+ENDMODULE.                 " CREATE_ALV_0300  OUTPUT
